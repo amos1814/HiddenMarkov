@@ -6,9 +6,9 @@ Run using ./hmm for a single iteration.
 "./hmm -i" '<number of iterations>' will specify the number of iterations
 "./hmm -st" will self-terminate when the sum probability reaches a local maximum.
 
-english.txt	1000 English words
+english10k.txt	10,000 English words
 
-input.txt	Smaller, sample input. HMM almost always works on this as intended.
+input.txt	Smaller, sample input. HMM results are always consistent and predictable.
 
 simclist.c	Used this library for manipulating lists
 
@@ -17,13 +17,12 @@ hmmcalc.c	This contains the meat of the calculations for the HMM
 
 hmm.c		Parses file and runs HMM.
 
-viterbi.c	Runs Viterbi algorithm
-
 graph.pdf	Graph of transitions between states, using Gnuplot 
 
 output.txt	Results of 20 separate runs of HMM, used to make graph.pdf
 ------------------------------------------------------------------------------------
 
+The algorithm and notation used is described thoroughly in "Elements of Statistical Natural Language Processing" by Christopher D. Manning and Hinrich Schütze.
 
 Expectation Maximization:
 To decide when to stop iterating, I experimented with both specifying the number of iterations, and deciding dynamically when to stop iterating. The latter was done by summing the probability of individual words across entire corpus. When this number stopped increasing, the program terminates and returns the current transition probabilities, as well as the log ratio of the emission probabilities between states. These can be seen by looking at a single instance in the output.txt file. I noticed that sometimes the sum probability decreases before increasing once again, so I set a lower limit of 10 iterations. One possible problem with this is that if sum probability continues decreasing, the data returned is not a local maximum. This can be solved by throwing away runs where this happens.

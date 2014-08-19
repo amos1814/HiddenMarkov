@@ -12,6 +12,7 @@ double sum(double* array, int size){
   for (i=0; i<size; i++){
     ret += array[i];
   }
+  return ret;
 }
 
 int seeker(const void *el, const void *key){
@@ -22,7 +23,7 @@ int seeker(const void *el, const void *key){
 void search_letter_count(list_t *letters, char letter){
   int i = 0;
   int size = 0;
-  letter_count *lc = (letter_count*)malloc(sizeof(letter_count));
+  letter_count *lc;
   list_attributes_seeker(letters, seeker);
   lc = (letter_count*)list_seek(letters, &letter);
   if (lc != NULL){
@@ -158,12 +159,13 @@ state *initialize_state(int state_num, list_t alphabet, int perturb){
   ret->emissions = emissions;
   
   // Randomize order of alphabet
-  char* letters = (char*)malloc(alphabet_size);
+  char* letters = (char*)malloc(alphabet_size + 1);
   letter_count *lc = (letter_count*)malloc(sizeof(letter_count));
   for (i=0; i<alphabet_size; i++){
     lc = list_get_at(&alphabet, i);
     letters[i] = lc->letter;
   }
+  letters[i] = '\0';
   
   shuffle(letters, alphabet_size);
   
@@ -472,6 +474,7 @@ list_t sum_soft_counts(list_t alphabet, list_t words, double *Pi, state *state_0
   }
   // printf("Size: %d\n", list_size(&ret));
   for (i=0; i<list_size(&words); i++){
+    
     word_buf = list_get_at(&words, i);
     //printf("Processing word: %s\n", word_buf);
     for (j=0; j<strlen(word_buf); j++){
@@ -496,6 +499,7 @@ list_t sum_soft_counts(list_t alphabet, list_t words, double *Pi, state *state_0
         new_Pi[1] += (sc10 + sc11);
       }
     }
+    
   }
   new_Pi[0] = new_Pi[0]/list_size(&words);
   new_Pi[1] = new_Pi[1]/list_size(&words);
@@ -598,8 +602,8 @@ double iterate_hmm(list_t alphabet, list_t words, double *Pi, state *state_0, st
   }
   
   for (i=0; i<list_size(&words); i++){
-  	char* word = (char*)malloc(sizeof(char));
-  	word = list_get_at(&words, i);
+  	//char* word = (char*)malloc(sizeof(char));
+  	//word = list_get_at(&words, i);
   	// printf("Total probability of %s = %lf\n", word, probability(word, Pi, state_0, state_1));
   	// printf("Total: %lf\n", total);
     
