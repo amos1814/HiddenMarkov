@@ -218,7 +218,6 @@ list_t alpha_init(double* Pi){
 // Does a single step of the alpha value calculations
 list_t alpha_step(list_t alpha_list, int time, char c, state *state_0, state *state_1){
   list_t ret;
-  list_init(&ret);
   ret = alpha_list;
   alphas *new = (alphas*)malloc(sizeof(alphas));
   alphas *temp;
@@ -233,7 +232,6 @@ list_t alpha_step(list_t alpha_list, int time, char c, state *state_0, state *st
 // calculates an alpha array for a given word
 list_t alpha_calc(list_t init, char* word, state *state_0, state *state_1){
   list_t ret;
-  list_init(&ret);
   ret = init;
   int length = strlen(word);
   int time;
@@ -259,7 +257,6 @@ list_t beta_init(){
 // Does a single step of the beta value calculations
 list_t beta_step(list_t beta_list, int time, char c, state *state_0, state *state_1){
   list_t ret;
-  list_init(&ret);
   ret = beta_list;
   alphas *new = (alphas*)malloc(sizeof(alphas));
   alphas *temp;
@@ -274,7 +271,6 @@ list_t beta_step(list_t beta_list, int time, char c, state *state_0, state *stat
 // calculates the array for beta
 list_t beta_calc(list_t init, char* word, state *state_0, state *state_1){
   list_t ret;
-  list_init(&ret);
   ret = init;
   int length = strlen(word);
   int time;
@@ -332,12 +328,17 @@ void print_alpha_beta(char* word, double* Pi, state *state_0, state *state_1, in
 double probability(char* word, double *Pi, state *state_0, state *state_1){
 	int length = strlen(word);
 	list_t alpha_array;
-  list_init(&alpha_array);
   alpha_array = alpha_init(Pi);
   alpha_array = alpha_calc(alpha_array, word, state_0, state_1);
   alphas *as;
   as = list_get_at(&alpha_array, length);
-  return as->a1 + as->a2;
+  double ret = as->a1 + as->a2;
+  int i;
+  for (i=0; i < list_size(&alpha_array); i++){
+    free(list_get_at(&alpha_array, i));
+  }
+  list_destroy(&alpha_array);
+  return ret;
 }
 
 // Get the soft count for a word and a transition from i to j, where i and j are 0 or 1
@@ -345,11 +346,9 @@ double soft_count(char* word, int pos, double *Pi, state *state_0, state *state_
 	int length = strlen(word);
 	double prob = probability(word, Pi, state_0, state_1);
 	list_t alpha_array;
-  list_init(&alpha_array);
   alpha_array = alpha_init(Pi);
   alpha_array = alpha_calc(alpha_array, word, state_0, state_1);
   list_t beta_array;
-  list_init(&beta_array);
   beta_array = beta_init();
   beta_array = beta_calc(beta_array, word, state_0, state_1);
   
@@ -386,6 +385,16 @@ double soft_count(char* word, int pos, double *Pi, state *state_0, state *state_
 			a = state_1->transitions[1];
     }
 	}
+  
+  for (i=0; i < list_size(&beta_array); i++){
+    free(list_get_at(&beta_array, i));
+  }
+  list_destroy(&beta_array);
+  
+  for (i=0; i < list_size(&alpha_array); i++){
+    free(list_get_at(&alpha_array, i));
+  }
+  list_destroy(&alpha_array);
 	return ((alpha * a * b * beta) / prob);
 }
 
@@ -604,8 +613,11 @@ double iterate_hmm(list_t alphabet, list_t words, double *Pi, state *state_0, st
   }
   
   list_t total_soft_counts;
-  list_init(&total_soft_counts);
   total_soft_counts = sum_soft_counts(alphabet, words, Pi, state_0, state_1, verbose);
+  for (i=0; i < list_size(&total_soft_counts); i++){
+    free(list_get_at(&total_soft_counts, i));
+  }
+  list_destroy(&total_soft_counts);
   if (print){
  		printf("------------------------------------------------------------------\n- End of Iteration Summary \n------------------------------------------------------------------\n");
   
